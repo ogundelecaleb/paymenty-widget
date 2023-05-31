@@ -1,4 +1,5 @@
 import React from 'react';
+
 const Modal = ({ isOpen, onClose, children }) => {
     const modalStyle = {
         display: isOpen ? 'block' : 'none',

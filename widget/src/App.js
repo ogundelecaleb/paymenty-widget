@@ -3,20 +3,14 @@ import Modal from "./component/Modal";
 import WidgetHome from "./widgetHome";
 
 const App = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsOpen(true);
-  };
+  const [isOpen, setIsOpen] = useState(true);
   const handleCloseModal = () => {
     setIsOpen(false);
   };
 
   return (
     <div>
-      <div>
-        <button  className="h-[48px] border" onClick={handleOpenModal}>Trigger modal</button>
-      </div>
+      
       <Modal isOpen={isOpen} onClose={handleCloseModal}>
         <div className="inline-block relative overflow-hidden text-left align-bottom transition-all transform bg-[white] rounded-2xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             
