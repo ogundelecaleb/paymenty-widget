@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "./component/Modal";
-import WidgetHome from "./component/widgetHome";
+import WidgetHome from "./widgetHome";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,5 +1,5 @@
 import React from "react";
-import SideBar from "./sideBar";
+import SideBar from "./component/sideBar";
 
 const WidgetHome = () => {
   return (
