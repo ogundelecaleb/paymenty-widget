@@ -20,18 +20,18 @@ const WidgetHome = () => {
     
 
     setAmount(amount);
-    processPayment(publicKey, secretKey, amount, currency);
+    // processPayment(publicKey, secretKey, amount, currency);
   }, []);
 
-  function processPayment(publicKey, secretKey, currency) {
+  // function processPayment(publicKey, secretKey, currency) {
    
-    console.log("Payment details:");
-    console.log("Public Key:", publicKey);
-    console.log("Secret Key:", secretKey);
-    console.log("Amount:", amount);
-    console.log("Currency:", currency);
+  //   console.log("Payment details:");
+  //   console.log("Public Key:", publicKey);
+  //   console.log("Secret Key:", secretKey);
+  //   console.log("Amount:", amount);
+  //   console.log("Currency:", currency);
   
-  }
+  // }
 
   const [isOpen, setIsOpen] = useState(true);
 
