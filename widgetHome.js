@@ -1,35 +1,39 @@
-import React, {useState} from "react";
+import React, { useEffect, useState } from "react";
 import SideBar from "./component/sideBar";
 import Modal from "./component/Modal";
-import { Navigate, Outlet, redirect } from "react-router-dom";
-
+import { Outlet } from "react-router-dom";
 
 const WidgetHome = () => {
+
+const [amount, setAmount] = useState("")
+const [onClose, setOnClose] = useState("")
+
+
   useEffect(() => {
     // Grab the URL parameters
-    const params = new URLSearchParams(window.location.search);
+    const params = new URL(window.location.href).searchParams;
     const publicKey = params.get("publicKey");
     const secretKey = params.get("secretKey");
     const amount = params.get("amount");
     const currency = params.get("currency");
+    const onClose = params.get("onCloseCallbackStr");
 
     // Process the payment using the retrieved details
-   
+    setOnClose(onClose)
+setAmount(amount)
     processPayment(publicKey, secretKey, amount, currency);
-  }, []);
+  }, []);
 
-function processPayment(publicKey, secretKey, amount, currency) {
-   
-  // You can use payment APIs or any other payment processing methods here
+  function processPayment(publicKey, secretKey, currency) {
+    // You can use payment APIs or any other payment processing methods here
 
-  // Example code to log the payment details
-  console.log("Payment details:");
-  console.log("Public Key:", publicKey);
-  console.log("Secret Key:", secretKey);
-  console.log("Amount:", amount);
-  console.log("Currency:", currency);
-  }
-
+    // Example code to log the payment details
+    console.log("Payment details:");
+    console.log("Public Key:", publicKey);
+    console.log("Secret Key:", secretKey);
+    console.log("Amount:", amount);
+    console.log("Currency:", currency);
+  }
 
   const [isOpen, setIsOpen] = useState(true);
   const handleCloseModal = () => {
@@ -68,7 +72,7 @@ function processPayment(publicKey, secretKey, amount, currency) {
           <div className=" md:mt-0 md:col-span-2">
             <div className="flex">
               <SideBar />
-              <Outlet/>
+              <Outlet />
             </div>
           </div>
         </div>
