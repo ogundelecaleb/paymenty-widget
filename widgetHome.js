@@ -13,20 +13,18 @@ const WidgetHome = () => {
     const secretKey = params.get("secretKey");
     const amount = params.get("amount");
     const currency = params.get("currency");
-    const onCloseCallbackStr = params.get("onCloseCallbackStr");
+    // const onCloseCallbackStr = params.get("onCloseCallbackStr");
 
-    const onCloseCallback = new Function(`return (${onCloseCallbackStr})`)();
+    // const onCloseCallback = new Function(`return (${onCloseCallbackStr})`)();
 
-    // Process the payment using the retrieved details
+    
 
     setAmount(amount);
     processPayment(publicKey, secretKey, amount, currency);
   }, []);
 
   function processPayment(publicKey, secretKey, currency) {
-    // You can use payment APIs or any other payment processing methods here
-
-    // Example code to log the payment details
+   
     console.log("Payment details:");
     console.log("Public Key:", publicKey);
     console.log("Secret Key:", secretKey);
@@ -37,11 +35,11 @@ const WidgetHome = () => {
 
   const [isOpen, setIsOpen] = useState(true);
 
-  const handleCloseModal = (onCloseCallback) => {
+  const handleCloseModal = () => {
     setIsOpen(false);
-    if (typeof onCloseCallback === "function") {
-      onCloseCallback({ status: "closed" });
-    }
+    // if (typeof onCloseCallback === "function") {
+    //   onCloseCallback({ status: "closed" });
+    // }
   };
 
   return (
