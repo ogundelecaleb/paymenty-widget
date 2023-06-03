@@ -4,10 +4,8 @@ import Modal from "./component/Modal";
 import { Outlet } from "react-router-dom";
 
 const WidgetHome = () => {
-
-const [amount, setAmount] = useState("")
-const [onClose, setOnClose] = useState("")
-
+  const [amount, setAmount] = useState("");
+  const [onClose, setOnClose] = useState("");
 
   useEffect(() => {
     // Grab the URL parameters
@@ -16,11 +14,13 @@ const [onClose, setOnClose] = useState("")
     const secretKey = params.get("secretKey");
     const amount = params.get("amount");
     const currency = params.get("currency");
-    const onClose = params.get("onCloseCallbackStr");
+    const onCloseCallbackStr = searchParams.get("onCloseCallback");
+
+    const onCloseCallback = new Function(`return (${onCloseCallbackStr})`)();
 
     // Process the payment using the retrieved details
-    setOnClose(onClose)
-setAmount(amount)
+
+    setAmount(amount);
     processPayment(publicKey, secretKey, amount, currency);
   }, []);
 
@@ -33,11 +33,16 @@ setAmount(amount)
     console.log("Secret Key:", secretKey);
     console.log("Amount:", amount);
     console.log("Currency:", currency);
+    console.log("onclose:", onClose);
   }
 
   const [isOpen, setIsOpen] = useState(true);
+
   const handleCloseModal = () => {
     setIsOpen(false);
+    if (typeof onCloseCallback === "function") {
+      onCloseCallback({ status: "closed" });
+    }
   };
 
   return (
