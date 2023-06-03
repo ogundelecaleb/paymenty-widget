@@ -5,16 +5,15 @@ import { Outlet } from "react-router-dom";
 
 const WidgetHome = () => {
   const [amount, setAmount] = useState("");
-  const [onClose, setOnClose] = useState("");
 
   useEffect(() => {
     // Grab the URL parameters
-    const params = new URL(window.location.href).searchParams;
+    const params = new URLSearchParams(window.location.search);
     const publicKey = params.get("publicKey");
     const secretKey = params.get("secretKey");
     const amount = params.get("amount");
     const currency = params.get("currency");
-    const onCloseCallbackStr = searchParams.get("onCloseCallback");
+    const onCloseCallbackStr = params.get("onCloseCallbackStr");
 
     const onCloseCallback = new Function(`return (${onCloseCallbackStr})`)();
 
@@ -33,12 +32,12 @@ const WidgetHome = () => {
     console.log("Secret Key:", secretKey);
     console.log("Amount:", amount);
     console.log("Currency:", currency);
-    console.log("onclose:", onClose);
+  
   }
 
   const [isOpen, setIsOpen] = useState(true);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (onCloseCallback) => {
     setIsOpen(false);
     if (typeof onCloseCallback === "function") {
       onCloseCallback({ status: "closed" });
