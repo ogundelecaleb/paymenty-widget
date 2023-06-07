@@ -4,7 +4,16 @@ import Modal from "./component/Modal";
 import { Outlet } from "react-router-dom";
 
 const WidgetHome = () => {
-  const [amount, setAmount] = useState("");
+  const BaseApiUrl = "http://94.229.79.27:39213/v1";
+  // const [amount, setAmount] = useState("");
+  const [isOpen, setIsOpen] = useState(true);
+  const [callbackStr, setCallbackStr] = useState(null);
+  const [successCallbackStr, setSuccessCallbackStr] = useState(null);
+  const [currency, setCurrency] = useState("");
+  const [merchantLogo, setMerchantLogo] = useState("")
+  const [merchantName, setMerchantName] = useState("")
+  const [sessionRef,setSessionRef] = useState("")
+  const [channel, setChannel] = useState("")
 
   useEffect(() => {
     // Grab the URL parameters
@@ -13,33 +22,64 @@ const WidgetHome = () => {
     const secretKey = params.get("secretKey");
     const amount = params.get("amount");
     const currency = params.get("currency");
-    // const onCloseCallbackStr = params.get("onCloseCallbackStr");
-
-    // const onCloseCallback = new Function(`return (${onCloseCallbackStr})`)();
-
+    var onCloseCallbackStr = params.get("onCloseCallback");
+    const onSuccessCallbackStr = params.get("onSuccessCallback");
     
+    console.log(amount)
+console.log(merchantName)
+    console.log(sessionRef)
+    console.log("channel:", channel)
 
-    setAmount(amount);
-    // processPayment(publicKey, secretKey, amount, currency);
+    /*eslint no-new-func: 0*/
+    setCallbackStr(onCloseCallbackStr);
+    setSuccessCallbackStr(onSuccessCallbackStr);
+
+    // Process the payment using the retrieved details
+
+    processPayment({ publicKey, secretKey, amount, currency });
   }, []);
-
-  // function processPayment(publicKey, secretKey, currency) {
-   
-  //   console.log("Payment details:");
-  //   console.log("Public Key:", publicKey);
-  //   console.log("Secret Key:", secretKey);
-  //   console.log("Amount:", amount);
-  //   console.log("Currency:", currency);
-  
-  // }
-
-  const [isOpen, setIsOpen] = useState(true);
+  const onCloseCallback = new Function(`return (${callbackStr})`)();
 
   const handleCloseModal = () => {
     setIsOpen(false);
-    // if (typeof onCloseCallback === "function") {
-    //   onCloseCallback({ status: "closed" });
-    // }
+
+    if (typeof onCloseCallback === "function") {
+      onCloseCallback({ status: "closed" });
+    }
+  };
+
+  const processPayment = ({ publicKey, secretKey, currency, amount }) => {
+    // You can use payment APIs or any other payment processing methods here
+    console.log(amount);
+    fetch(`${BaseApiUrl}/payment/initiate`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "Public-Key": publicKey ,
+      },
+      body: JSON.stringify({ currencyCode: currency }),
+    })
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.isSuccessful && res.data) {
+          setSessionRef(res.data.sessionReference)
+          setCurrency(res.data.currency)
+          setMerchantLogo(res.data.merchantLogo)
+          setMerchantName(res.data.merchantName)
+          setChannel(res.data.channels)
+          console.log("initiatesuccessful");
+        } else if (!res.isSuccessful) {
+          console.log("error message:", res.message || res.title || "");
+        }
+      });
+
+    // Example code to log the payment detail
+    console.log("Payment details:");
+    console.log("Public Key:", publicKey);
+    console.log("Secret Key:", secretKey);
+    console.log("Amount:", amount);
+    console.log("Currency:", currency);
   };
 
   return (
@@ -74,11 +114,12 @@ const WidgetHome = () => {
           <div className=" md:mt-0 md:col-span-2">
             <div className="flex">
               <SideBar />
-              <Outlet />
-            </div>
+              <Outlet context={[successCallbackStr]} />
+            </div>{" "}
           </div>
         </div>
       </Modal>
+      
     </div>
   );
 };
