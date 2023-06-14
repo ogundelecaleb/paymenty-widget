@@ -1,26 +1,51 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import ThreeDAuth from "../3d";
 
 const CardDetails = () => {
   const navigate = useNavigate();
-  const [successCallbackStr] = useOutletContext();
+  const [
+    successCallbackStr,
+    publicKey,
+    sessionRef,
+    currency,
+    amount,
+    BaseApiUrl,
+    email,
+    firstName,
+    lastName,
+    phoneNumber,
+  ] = useOutletContext();
   const [cardNumber, setCardNumber] = useState("");
+  const [transactionRef, setTransactionRef] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [cvvErrorMessage, setCvvErrorMessage] = useState("");
   const [cvv, setCvv] = useState("");
-  const [mastercard, setMastercard] = useState(false);
-  const [verve, setVerve] = useState(false);
-  const [visa, setVisa] = useState(false);
+  const [year, setYear] = useState("");
+  const [month, setMonth] = useState("");
   const [cardType, setCardType] = useState("");
   const [expiry, setExpiry] = useState("");
-
+  const [unpartCardNumber, setUnpartCardNumber] = useState("");
+  const [loading, setLoaading] = useState(false);
+  const [formData, setFormData] = useState("");
+  /*eslint no-unused-vars: 0*/
+  /*eslint no-useless-escape: 0*/
   /*eslint no-new-func: 0*/
   const onCloseCallback = new Function(`return (${successCallbackStr})`)();
 
   useEffect(() => {
-    console.log(expiry);
-    console.log(cardNumber);
+    console.log("month:", month);
+    console.log("year:", transactionRef);
+    console.log(unpartCardNumber);
+    splitExpry();
   });
+
+  const splitExpry = () => {
+    const mm = expiry.substring(0, 2);
+    const yy = expiry.substring(3, 5);
+    setMonth(mm);
+    setYear(yy);
+  };
 
   function handleCardNumber(event) {
     let new_cardNumber = event.target.value;
@@ -48,12 +73,13 @@ const CardDetails = () => {
     var matches = v.match(/\d{4,19}/g);
     var match = (matches && matches[0]) || "";
     var parts = [];
+    setUnpartCardNumber(v);
 
-    if (new_cardNumber.length < 1) {
-      setVisa(false);
-      setVerve(false);
-      setMastercard(false);
-    }
+    // if (new_cardNumber.length < 1) {
+    //   setVisa(false);
+    //   setVerve(false);
+    //   setMastercard(false);
+    // }
     const masterFormat = [
       "22",
       "23",
@@ -101,7 +127,6 @@ const CardDetails = () => {
     for (i = 0, len = match.length; i < len; i += 4) {
       parts.push(match.substring(i, i + 4));
     }
-    // {match.length.slice(0, 4).map(() => parts.push(match.substring(i, i + 4)))}
 
     if (parts.length) {
       document.getElementById("c_number").value = parts.join(" ");
@@ -127,10 +152,44 @@ const CardDetails = () => {
 
   const expriy_format = (value) => {
     const expdate = value;
-    const expDateFormatter =
-      expdate.replace(/\//g, "").substring(0, 2) +
-      (expdate.length > 2 ? "/" : "") +
-      expdate.replace(/\//g, "").substring(2, 4);
+
+    const expDateFormatter = expdate
+      .replace(
+        /^([1-9]\/|[2-9])$/g,
+        "0$1/" // To handle 3/ > 03/
+      )
+      .replace(
+        /^(0[1-9]{1}|1[0-2]{1})$/g,
+        "$1/" // 11 > 11/
+      )
+      .replace(
+        /^([0-1]{1})([3-9]{1})$/g,
+        "0$1/$2" // 13 > 01/3
+      )
+      .replace(
+        /^(\d)\/(\d\d)$/g,
+        "0$1/$2" // To handle 1/11 > 01/11
+      )
+      .replace(
+        /^(0?[1-9]{1}|1[0-2]{1})([0-9]{2})$/g,
+        "$1/$2" // 141 > 01/41
+      )
+      .replace(
+        /^([0]{1,})\/|[0]{1,}$/g,
+        "0" // To handle 0/ > 0 and 00 > 0
+      )
+      .replace(
+        /[^\d\/]|^[\/]{0,}$/g,
+        "" // To allow only numbers and /
+      )
+      .replace(
+        /\/\//g,
+        "/" // Prevent entering more than 1 /
+      );
+    // const expDateFormatter =
+    //   expdate.replace(/\//g, "").substring(0, 2) +
+    //   (expdate.length > 2 ? "/" : "") +
+    //   expdate.replace(/\//g, "").substring(2, 4);
 
     return expDateFormatter;
   };
@@ -139,12 +198,12 @@ const CardDetails = () => {
     setExpiry(e.target.value);
   };
 
-  function handlePayment() {
-    navigate("/index/otp");
-    if (typeof onCloseCallback === "function") {
-      onCloseCallback({ status: "This is success message" });
-    }
-  }
+  // function handlePayment() {
+  //   navigate("/index/otp");
+  //   if (typeof onCloseCallback === "function") {
+  //     onCloseCallback({ status: "This is success message" });
+  //   }
+  // }
 
   function handlecvv(e) {
     let value = e.target.value;
@@ -159,18 +218,84 @@ const CardDetails = () => {
       value = v;
     }
   }
+
+  async function handleCardPayment(e) {
+    e.preventDefault();
+    setLoaading(true);
+    const response = await fetch(`${BaseApiUrl}/payment/charge`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "Public-Key": publicKey,
+      },
+      body: JSON.stringify({
+        clientReference: "",
+        currencyCode: currency,
+        sessionReference: sessionRef,
+        channel: "Card",
+        amount: amount,
+        chargeParameters: {
+          CardNumber: unpartCardNumber,
+          ExpiryMonth: month,
+          ExpiryYear: "20" + year,
+          CardCvv: cvv,
+        },
+        customerInformation: {
+          email: email,
+          phoneNumber: phoneNumber,
+          firstName: firstName,
+          lastName: lastName,
+        },
+
+        redirectUrl: "",
+      }),
+    });
+    const data = await response.json(); //
+    if (data.isSuccessful && data.data) {
+      setTransactionRef(data?.data?.transactionReference);
+      if (data.data.details?.FormData?.Body === undefined) {
+        navigate("/index/otp", { state: data?.data?.transactionReference });
+      } else {
+        console.log(data.data.details?.FormData.Body);
+        // Create a new HTML document
+        // const stringedBody = (data?.data?.details?.FormData.Body).toString();
+        // const newTab = window.open("", "_blank");
+
+        // Set the content of the new page
+    //     newTab.document.write(`<html ><head><title>Document</title></head><body>${stringedBody}          <script>
+    //     var from = document.getElementById("threedsChallengeRedirectForm");
+    //     from.submit();
+    // </script></body></html>`);
+        // Close the document and focus on the new tab
+        // newTab.document.close();
+        // newTab.focus();
+        // return <ThreeDAuth Body={data.data.details?.FormData.Body}/>
+        // navigate("www.google.com")
+        navigate("/3dauth", { state: data.data.details?.FormData.Body });
+        // setFormData(data.data.details?.FormData.Body)
+      }
+
+      setLoaading(false);
+
+      console.log("CHARGEsuccessful");
+    } else if (!data.isSuccessful) {
+      setLoaading(false);
+      console.log("error message: not successful");
+    }
+  }
   return (
     <div className="py-5  px-[20px]">
       {/* <div className="flex  justify-end"> */}
       <div className="text-right text-[10px] pr-3 mt-2">
-        <p>admin@paylodeservices.com</p>
+        <p>{email}</p>
         <p>
-          Pay <span className="font-bold text-[#124072]">#20,000.00</span>{" "}
+          Pay <span className="font-bold text-[#124072]">₦{amount}</span>{" "}
         </p>
       </div>
       {/* </div> */}
 
-      <form onSubmit="">
+      <form onSubmit={handleCardPayment}>
         <div className="overflow-hidden  sm:rounded-md">
           <div className="container mt-[30px]">
             <p className="text-[#718096]  text-[10px] leading-[21px] tracking-[0.2px] font-bold mb-[7px]">
@@ -185,8 +310,9 @@ const CardDetails = () => {
                 autofocus
                 required
                 // value={cardNumber}
-                onKeyPress={handleCardNumber}
+                onChange={handleCardNumber}
               />
+
               <div className="absolute right-1 -translate-y-[90%] h-[36px]">
                 {cardType && cardType === "master" ? (
                   <img
@@ -244,33 +370,33 @@ const CardDetails = () => {
           </div>
           <div className="mt-4">
             <button
-              onClick={handlePayment}
+              // onClick={handlePayment}
               type="submit"
               className="py-[9px] items-center rounded-[24px] w-[80%]  md:w-[50%] mx-auto bg-[#124072] text-[white] text-[10px] leading-[24px] tracking-[0.2px] font-bold flex justify-center "
             >
-              Pay NGN 20,000{" "}
-              {/* {loading && (
-          <svg
-            className="ml-4 w-6 h-6 text-[white] animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-        )} */}
+              Pay NGN {amount}{" "}
+              {loading && (
+                <svg
+                  className="ml-4 w-6 h-6 text-[white] animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              )}
             </button>
           </div>
         </div>

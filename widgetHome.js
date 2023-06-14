@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "./component/sideBar";
+// import { encrypt, decrypt, compare } from "n-krypta";
 import Modal from "./component/Modal";
 import { Outlet } from "react-router-dom";
 
 const WidgetHome = () => {
   const BaseApiUrl = "http://94.229.79.27:39213/v1";
-  // const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("200");
   const [isOpen, setIsOpen] = useState(true);
   const [callbackStr, setCallbackStr] = useState(null);
+  const [email, setEmail] = useState(null);
   const [successCallbackStr, setSuccessCallbackStr] = useState(null);
   const [currency, setCurrency] = useState("");
-  const [merchantLogo, setMerchantLogo] = useState("")
-  const [merchantName, setMerchantName] = useState("")
-  const [sessionRef,setSessionRef] = useState("")
-  const [channel, setChannel] = useState("")
+  const [merchantLogo, setMerchantLogo] = useState("");
+  const [merchantName, setMerchantName] = useState("");
+  const [sessionRef, setSessionRef] = useState("");
+  const [publicKey, setPublicKey] = useState("");
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
 
   useEffect(() => {
     // Grab the URL parameters
@@ -21,23 +26,31 @@ const WidgetHome = () => {
     const publicKey = params.get("publicKey");
     const secretKey = params.get("secretKey");
     const amount = params.get("amount");
+    const firstname = params.get("firstname");
+    const lastname = params.get("lastname");
+    const phonenumber = params.get("phonenumber");
     const currency = params.get("currency");
+    const email = params.get("email");
     var onCloseCallbackStr = params.get("onCloseCallback");
     const onSuccessCallbackStr = params.get("onSuccessCallback");
-    
-    console.log(amount)
-console.log(merchantName)
-    console.log(sessionRef)
-    console.log("channel:", channel)
 
+    setEmail(email);
+    setAmount(amount);
+    setFirstName(firstname)
+    setLastName(lastname)
+    setPhoneNumber(phonenumber)
+    // const secret = "my-secret";
+    // const decryptedString = decrypt(onCloseCallbackStr, secret);
     /*eslint no-new-func: 0*/
     setCallbackStr(onCloseCallbackStr);
     setSuccessCallbackStr(onSuccessCallbackStr);
+    setPublicKey(publicKey);
 
     // Process the payment using the retrieved details
 
     processPayment({ publicKey, secretKey, amount, currency });
-  }, []);
+  }, [publicKey]);
+
   const onCloseCallback = new Function(`return (${callbackStr})`)();
 
   const handleCloseModal = () => {
@@ -56,18 +69,18 @@ console.log(merchantName)
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "Public-Key": publicKey ,
+        "Public-Key": publicKey,
       },
-      body: JSON.stringify({ currencyCode: currency }),
+      body: JSON.stringify({ currencyCode: "NGN" }),
     })
       .then((response) => response.json())
       .then((res) => {
         if (res.isSuccessful && res.data) {
-          setSessionRef(res.data.sessionReference)
-          setCurrency(res.data.currency)
-          setMerchantLogo(res.data.merchantLogo)
-          setMerchantName(res.data.merchantName)
-          setChannel(res.data.channels)
+          setSessionRef(res.data.sessionReference);
+          setCurrency(res.data.currency);
+          setMerchantLogo(res.data.merchantLogo);
+          setMerchantName(res.data.merchantName);
+
           console.log("initiatesuccessful");
         } else if (!res.isSuccessful) {
           console.log("error message:", res.message || res.title || "");
@@ -85,12 +98,12 @@ console.log(merchantName)
   return (
     <div>
       <Modal isOpen={isOpen} onClose={handleCloseModal}>
-        <div className="inline-block relative overflow-hidden text-left align-bottom transition-all transform bg-[white] rounded-2xl shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div className="inline-block relative overflow-hidden text-left align-bottom transition-all transform bg-[white] rounded-2xl shadow-xl sm:my-8 sm:align-middle sm:max-w-[28rem] sm:w-full">
           <svg
             onClick={handleCloseModal}
             className="cursor-pointer absolute right-1 top-2 "
-            width="24"
-            height="24"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -111,15 +124,27 @@ console.log(merchantName)
             />
           </svg>
 
-          <div className=" md:mt-0 md:col-span-2">
-            <div className="flex">
+          <div className=" md:mt-0 w-full">
+            <div className="flex w-full">
               <SideBar />
-              <Outlet context={[successCallbackStr]} />
+              <Outlet
+                context={[
+                  successCallbackStr,
+                  publicKey,
+                  sessionRef,
+                  currency,
+                  amount,
+                  BaseApiUrl,
+                  email,
+                  firstName,
+                  lastName,
+                  phoneNumber,
+                ]}
+              />
             </div>{" "}
           </div>
         </div>
       </Modal>
-      
     </div>
   );
 };
