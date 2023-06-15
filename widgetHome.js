@@ -16,9 +16,9 @@ const WidgetHome = () => {
   const [merchantName, setMerchantName] = useState("");
   const [sessionRef, setSessionRef] = useState("");
   const [publicKey, setPublicKey] = useState("");
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
     // Grab the URL parameters
@@ -36,17 +36,23 @@ const WidgetHome = () => {
 
     setEmail(email);
     setAmount(amount);
-    setFirstName(firstname)
-    setLastName(lastname)
-    setPhoneNumber(phonenumber)
+    setFirstName(firstname);
+    setLastName(lastname);
+    setPhoneNumber(phonenumber);
     // const secret = "my-secret";
     // const decryptedString = decrypt(onCloseCallbackStr, secret);
     /*eslint no-new-func: 0*/
     setCallbackStr(onCloseCallbackStr);
     setSuccessCallbackStr(onSuccessCallbackStr);
     setPublicKey(publicKey);
+    
+
 
     // Process the payment using the retrieved details
+    window["closeWidget"] = closeWidget;
+    window.globalThis = {
+      "another": closeWidget
+    }
 
     processPayment({ publicKey, secretKey, amount, currency });
   }, [publicKey]);
@@ -60,6 +66,10 @@ const WidgetHome = () => {
       onCloseCallback({ status: "closed" });
     }
   };
+
+  const closeWidget = function(){
+    setIsOpen(false);
+  }
 
   const processPayment = ({ publicKey, secretKey, currency, amount }) => {
     // You can use payment APIs or any other payment processing methods here
@@ -145,6 +155,7 @@ const WidgetHome = () => {
           </div>
         </div>
       </Modal>
+
     </div>
   );
 };

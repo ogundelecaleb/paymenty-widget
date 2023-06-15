@@ -8,19 +8,19 @@ const ThreeDAuth = () => {
 
   useEffect(() => {
    
-    var holder = document.getElementById("holder");
+    // var holder = document.getElementById("holder");
 
-    if (holder !== undefined && holder !== null) {
-      // var full = location.state;
-      var first = location.state;
-      var holder = document.getElementById("holder");
-      holder.innerHTML = first;
-      var s = document.createElement("script");
-      s.type = "text/javascript";
-      s.text = `var from = document.getElementById("formId");from.submit();`;
-      console.log(holder);
-      holder.append(s);
-    }
+    // if (holder !== undefined && holder !== null) {
+    //   // var full = location.state;
+    //   var first = location.state;
+    //   var holder = document.getElementById("holder");
+    //   holder.innerHTML = first;
+    //   var s = document.createElement("script");
+    //   s.type = "text/javascript";
+    //   s.text = `var from = document.getElementById("formId");from.submit();`;
+    //   console.log(holder);
+    //   holder.append(s);
+    // }
 
     // console.log(append);
     // var newTab = window.open('', '_blank');

@@ -254,34 +254,46 @@ const CardDetails = () => {
     const data = await response.json(); //
     if (data.isSuccessful && data.data) {
       setTransactionRef(data?.data?.transactionReference);
-      if (data.data.details?.FormData?.Body === undefined) {
-        navigate("/index/otp", { state: data?.data?.transactionReference });
-      } else {
+      if (data.data.details?.FormData?.Body !== undefined) {
         console.log(data.data.details?.FormData.Body);
         // Create a new HTML document
-        // const stringedBody = (data?.data?.details?.FormData.Body).toString();
-        // const newTab = window.open("", "_blank");
+        let stringedBody = data?.data?.details?.FormData?.Body;
+        stringedBody = stringedBody.toString() || "Hello";
+        var closeFunc = window["closeWidget"];
+        const newTab = window.open("", "_blank");
 
+        //call the close widget function stored in the windows
+        window["closeWidget"] = "closeFunc";
+
+        // window.focus();
+        console.log(window);
         // Set the content of the new page
-    //     newTab.document.write(`<html ><head><title>Document</title></head><body>${stringedBody}          <script>
-    //     var from = document.getElementById("threedsChallengeRedirectForm");
-    //     from.submit();
-    // </script></body></html>`);
-        // Close the document and focus on the new tab
-        // newTab.document.close();
-        // newTab.focus();
-        // return <ThreeDAuth Body={data.data.details?.FormData.Body}/>
-        // navigate("www.google.com")
-        navigate("/3dauth", { state: data.data.details?.FormData.Body });
-        // setFormData(data.data.details?.FormData.Body)
+        if (newTab != null) {
+          newTab.document
+            .write(`<html ><head><title>Document</title></head><body>${stringedBody}<script>
+            var from = document.getElementById("formId");
+            from.submit();
+        </script></body></html>`);
+
+          // Close the document and focus on the new tab
+          newTab.document.close();
+          newTab.focus();
+          console.log(newTab);
+        }
+      } else if (data.data?.details?.IsAuthRequired === false) {
+        navigate("/index/otp", { state: data?.data?.transactionReference });
+      } else if (
+        data.data?.details?.IsAuthRequired === false &&
+        data.data?.details?.ProviderMessage === "DECLINED"
+      ) {
+        navigate("/index/otp", {state: data?.data?.details?.ProviderMessage });
       }
-
       setLoaading(false);
-
       console.log("CHARGEsuccessful");
-    } else if (!data.isSuccessful) {
+    } else {
       setLoaading(false);
       console.log("error message: not successful");
+      navigate("/index/failed");
     }
   }
   return (
