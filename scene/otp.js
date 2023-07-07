@@ -20,6 +20,7 @@ const Otp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState("");
   const [transactionStat, setTransactionStat] = useState("")
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     console.log("otp:", otp);
@@ -30,6 +31,7 @@ const Otp = () => {
   async function handleOtp(e) {
 
     e.preventDefault();
+    setLoading(true)
     const response = await fetch(`${BaseApiUrl}/payment/validate`, {
       method: "POST",
       headers: {
@@ -45,16 +47,18 @@ const Otp = () => {
     if ( data?.data && data?.data.transactionStatus === "Success") {
       console.log( data?.data?.transactionStatus)
       navigate("/success");
+      setLoading(false)
       console.log("otpsuccessful");
     } else if (!data.isSuccessful || data?.data.transactionStatus === "Failed") {
       navigate("/index/failed");
+      setLoading(false)
       console.log("error message:", data.message || data.title || "");
     }
   }
 
   return (
-    <div className="py-5  px-[20px]">
-      <h3 className="text-[20px] text-[#1a202c]  font-bold pb-1">
+    <div className="py-5 w-full  px-[20px]">
+      <h3 className="text-[20px] text-gray-500  font-bold pb-1">
         Validate OTP 
       </h3>
       <p className="text-[#718096] text-sm mb-5">
@@ -85,7 +89,7 @@ const Otp = () => {
       <button
         type="button"
         onClick={handleOtp}
-        class="py-[9px] items-center rounded-[20px] w-full my-[15px] bg-[#124072] text-[#ffffff] text-[16px] leading-[24px] tracking-[0.2px] font-bold flex justify-center "
+        class="py-[9px] items-center rounded-[16px] w-full my-[15px] bg-[#124072] text-[#ffffff] text-[16px] leading-[24px] tracking-[0.2px] font-bold flex justify-center "
       >
         Validate OTP{" "}
         {/* {isLoading && (

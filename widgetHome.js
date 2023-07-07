@@ -5,7 +5,7 @@ import Modal from "./component/Modal";
 import { Outlet } from "react-router-dom";
 
 const WidgetHome = () => {
-  const BaseApiUrl = "http://94.229.79.27:39213/v1";
+  const BaseApiUrl = "https://paymentgatewayapi.paylodeservices.com/v1";
   const [amount, setAmount] = useState("200");
   const [isOpen, setIsOpen] = useState(true);
   const [callbackStr, setCallbackStr] = useState(null);
@@ -19,6 +19,8 @@ const WidgetHome = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [closewidgetStr, setClosewidgetStr] = useState("");
+  const [redirectUrl, setredirectUrl] = useState("");
 
   useEffect(() => {
     // Grab the URL parameters
@@ -31,45 +33,53 @@ const WidgetHome = () => {
     const phonenumber = params.get("phonenumber");
     const currency = params.get("currency");
     const email = params.get("email");
+    const redirectUrl = params.get("redirectUrl");
     var onCloseCallbackStr = params.get("onCloseCallback");
+    var closewidgetStr = params.get("closewidget");
     const onSuccessCallbackStr = params.get("onSuccessCallback");
+
+    console.log(params);
 
     setEmail(email);
     setAmount(amount);
     setFirstName(firstname);
     setLastName(lastname);
     setPhoneNumber(phonenumber);
+    setCurrency(currency);
+    setredirectUrl(redirectUrl);
+
     // const secret = "my-secret";
     // const decryptedString = decrypt(onCloseCallbackStr, secret);
     /*eslint no-new-func: 0*/
     setCallbackStr(onCloseCallbackStr);
+    setClosewidgetStr(closewidgetStr);
     setSuccessCallbackStr(onSuccessCallbackStr);
     setPublicKey(publicKey);
-    
-
 
     // Process the payment using the retrieved details
     window["closeWidget"] = closeWidget;
-    window.globalThis = {
-      "another": closeWidget
-    }
+    // window.globalThis = {
+    //   "another": closeWidget
+    // }
 
     processPayment({ publicKey, secretKey, amount, currency });
   }, [publicKey]);
 
   const onCloseCallback = new Function(`return (${callbackStr})`)();
 
-  const handleCloseModal = () => {
+  function handleCloseModal() {
     setIsOpen(false);
-
+    const closeWidget = new Function(`return (${closewidgetStr})`)();
     if (typeof onCloseCallback === "function") {
       onCloseCallback({ status: "closed" });
     }
-  };
-
-  const closeWidget = function(){
-    setIsOpen(false);
+    if (typeof closeWidget === "function") {
+      closeWidget({ status: "closed" });
+    }
   }
+  const closeWidget = function () {
+    setIsOpen(false);
+  };
 
   const processPayment = ({ publicKey, secretKey, currency, amount }) => {
     // You can use payment APIs or any other payment processing methods here
@@ -81,7 +91,7 @@ const WidgetHome = () => {
         "Content-Type": "application/json",
         "Public-Key": publicKey,
       },
-      body: JSON.stringify({ currencyCode: "NGN" }),
+      body: JSON.stringify({ currencyCode: currency }),
     })
       .then((response) => response.json())
       .then((res) => {
@@ -96,19 +106,12 @@ const WidgetHome = () => {
           console.log("error message:", res.message || res.title || "");
         }
       });
-
-    // Example code to log the payment detail
-    console.log("Payment details:");
-    console.log("Public Key:", publicKey);
-    console.log("Secret Key:", secretKey);
-    console.log("Amount:", amount);
-    console.log("Currency:", currency);
   };
 
   return (
     <div>
       <Modal isOpen={isOpen} onClose={handleCloseModal}>
-        <div className="inline-block relative overflow-hidden text-left align-bottom transition-all transform bg-[white] rounded-2xl shadow-xl sm:my-8 sm:align-middle sm:max-w-[28rem] sm:w-full">
+        <div className="inline-block relative overflow-hidden text-left align-bottom transition-all transform bg-[white]  shadow-xl sm:my-8 sm:align-middle sm:max-w-[28rem] sm:w-full">
           <svg
             onClick={handleCloseModal}
             className="cursor-pointer absolute right-1 top-2 "
@@ -149,13 +152,13 @@ const WidgetHome = () => {
                   firstName,
                   lastName,
                   phoneNumber,
+                  redirectUrl,
                 ]}
               />
             </div>{" "}
           </div>
         </div>
       </Modal>
-
     </div>
   );
 };

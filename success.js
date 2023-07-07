@@ -1,6 +1,22 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
+import { useNavigate, Link } from "react-router-dom";
+
 
 const Success = () => {
+  const  [origin, setOrigin] = useState("")
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    // Grab the URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get("url");
+
+console.log("params:",   params)
+    setOrigin(url)
+  })
+
+
   return (
     <div
       className="fixed inset-0 z-10 overflow-y-auto"
@@ -45,9 +61,11 @@ const Success = () => {
               />
             </svg>
           </div>
+
+          <Link to={`${origin}`}>
           <button
             type="button"
-            //   onClick={validtaeOtp}
+              // onClick={() => {navigate(`${origin}`)}}
             class="py-[9px] mx-auto rounded-[16px] w-full md:w-[60%] my-[15px] bg-[#124072] text-[#ffffff] text-[14px] leading-[24px] tracking-[0.2px] flex justify-center "
           >
             Go Back To Page{" "}
@@ -73,7 +91,7 @@ const Success = () => {
           ></path>
         </svg>
       )} */}
-          </button>{" "}
+          </button></Link>{" "}
         </div>
       </div>
     </div>

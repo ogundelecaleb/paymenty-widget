@@ -1,6 +1,20 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
+import { useNavigate, Link } from "react-router-dom";
+
 
 const FailedTransaction = () => {
+  const  [origin, setOrigin] = useState("")
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    // Grab the URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get("url");
+
+console.log("params:",   params)
+    setOrigin(url)
+  })
   return (
     <div
       className="fixed inset-0 z-10 overflow-y-auto"
@@ -31,6 +45,9 @@ const FailedTransaction = () => {
           <div className="mx-auto my-8">
            <img src="/failed.svg" alt="failed" className="h-[40px] w-[40px] mx-auto"/>
           </div>
+
+
+          <Link to={`${origin}`}>
           <button
             type="button"
             //   onClick={validtaeOtp}
@@ -60,6 +77,7 @@ const FailedTransaction = () => {
         </svg>
       )} */}
           </button>{" "}
+          </Link>
         </div>
       </div>
     </div>
